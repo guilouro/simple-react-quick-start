@@ -1,98 +1,69 @@
-import React, { useState } from 'react';
-import * as S from './styles';
+import React, { useState } from 'react'
+import * as S from './styles'
 
-class Main extends React.Component {
+const Main = () => {
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+  const operations = ['-', 'x', '/', '+']
+  const [values, setValue] = useState([])
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      first: 0,
-      operation: 0,
-      second: 0,
-      value: 0,
-    }
-  }
+  const clear = () => setValue([])
 
-  handleClick = (item) => {
-    const { first, operation } = this.state;
-
-    if (!first) {
-      this.setState({ first: item });
-      return;
-    }
-
-    if (!operation) {
-      this.setState({ operation: item });
-      return;
-    }
-
-    this.setState({ second: item });
-    return;
-   }
-
-  doCalculate = () => {
-    const { first, operation, second } = this.state;
-
+  const calc = (first, operation, second) => {
     const operations = {
-      '+': this.sum,
-      '*': this.multiply,
-      '/': this.division,
-      '-': this.subtract,
+      '+': first + second,
+      '-': first - second,
+      'x': first * second,
+      '/': first / second
     }
 
-    console.log(operation)
-
-    const value = operations[operation](first, second);
-    this.setState({ value });
+    return operations[operation]
   }
 
-  sum = (first, second) => first + second
+  const doCalculate = () => {
+    const string = values.join('')
+    const nums = string.match(/\d+/g)
+    const signals = string.match(/[\W-x]/g)
 
-  division = (first, second) => first / second
+    const result = signals.reduce((value, signal, idx) => (
+      calc(Number(value), signal, Number(nums[idx + 1]))
+    ), nums[0])
 
-  multiply = (first, second) => first * second
-
-  subtract = (first, second) => first - second
-
-  render() {
-    const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    const operations = ['-', '*', '/', '+'];
-
-    const { first, operation, second, value } = this.state;
-    return (
-      <section>
-        <div className="display">
-          {first || ''} {operation || ''} {second || ''} {value ? ` = ${value}` : ''}
-        </div>
-        <div className="operartions">
-          {operations.map(operation => (
-            <S.Button
-              key={operation}
-              onClick={() => this.handleClick(operation)}
-            >
-              {operation}
-            </S.Button>
-          ))}
-        </div>
-        <div className="numbers">
-          {numbers.map(number => (
-            <S.Button
-              key={number}
-              onClick={() => this.handleClick(number)}
-            >
-              {number}
-            </S.Button>
-          ))}
-        </div>
-
-        <S.Button onClick={this.doCalculate}>
-          =
-        </S.Button>
-
-      </section>
-    )
+    setValue([result])
   }
+
+  const handleClick = (item) => {
+    setValue([...values, item])
+  }
+
+  return (
+    <section>
+      <S.Display>{values.length ? values : 0}</S.Display>
+
+      <S.Operations>
+        {operations.map(operation => (
+          <S.Button
+            key={operation}
+            onClick={() => handleClick(operation)}
+          >
+            {operation}
+          </S.Button>
+        ))}
+      </S.Operations>
+
+      <S.Numbers>
+        {numbers.map(number => (
+          <S.Button
+            key={number}
+            onClick={() => handleClick(number)}
+          >
+            {number}
+          </S.Button>
+        ))}
+        <S.Button onClick={doCalculate}>=</S.Button>
+        <S.Button onClick={clear}>C</S.Button>
+      </S.Numbers>
+    </section>
+  )
 }
 
-
-export default Main;
+export default Main
